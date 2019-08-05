@@ -24,11 +24,13 @@
         android:onClick="@{(v)->presenter.onLocationEvent()}">
 
         <LinearLayout
+            android:id="@+id/list_line"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
             <ImageView
+                android:id="@+id/vLogo"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_gravity="center"
@@ -40,6 +42,7 @@
                 android:orientation="vertical">
 
                 <TextView
+                    android:id="@+id/vName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
@@ -49,6 +52,7 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/vAddress"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"

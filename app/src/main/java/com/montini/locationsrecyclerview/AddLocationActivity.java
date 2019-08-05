@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,12 +17,9 @@ import android.widget.ImageView;
 import com.montini.locationsrecyclerview.model.Location;
 import com.squareup.picasso.Picasso;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-
 public class AddLocationActivity extends AppCompatActivity {
+
+    private static final String TAG = "AddLocationActivity";
 
     EditText name, address, maxCourts;
     Button btnSave;
@@ -29,7 +27,7 @@ public class AddLocationActivity extends AppCompatActivity {
     Location cLocation;
     Toolbar toolbar;
 
-    static final int GALLERY_REQUEST_CODE = 02;
+    static final int IMAGE_REQUEST_CODE = 02;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,23 +66,24 @@ public class AddLocationActivity extends AppCompatActivity {
 
     public void logo_Click(View v) {
         //Create an Intent with action as ACTION_PICK
-        Intent intent = new Intent(Intent.ACTION_PICK);
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         // Sets the type as image/*. This ensures only components of type image are selected
         intent.setType("image/*");
         //We pass an extra array with the accepted mime types. This will ensure only components with these MIME types as targeted.
         String[] mimeTypes = {"image/jpeg", "image/png"};
         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
         // Launching the Intent
-        startActivityForResult(intent, GALLERY_REQUEST_CODE);
+        startActivityForResult(intent, IMAGE_REQUEST_CODE);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
-            case GALLERY_REQUEST_CODE:
+            case IMAGE_REQUEST_CODE:
                 Uri selectedImage = data.getData();
-                logo.setTag(Uri.parse(selectedImage.toString()).getPath());
+                // logo.setTag(Uri.parse(selectedImage.toString()).getPath());
+                logo.setTag(selectedImage);
                 logo.setImageURI(selectedImage);
                 // writeUsingOutputStream(selectedImage.toString());
                 Picasso.with(this).load(selectedImage).resize(480, 480).centerCrop().into(logo);
