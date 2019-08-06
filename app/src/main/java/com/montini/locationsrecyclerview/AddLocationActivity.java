@@ -3,6 +3,7 @@ package com.montini.locationsrecyclerview;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Parcelable;
 import android.provider.OpenableColumns;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -10,10 +11,12 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.montini.locationsrecyclerview.model.Location;
 import com.squareup.picasso.Picasso;
@@ -22,7 +25,7 @@ public class AddLocationActivity extends AppCompatActivity {
 
     // constants
     private static final String TAG = "AddLocationActivity";
-    static final int IMAGE_REQUEST_CODE = 02;
+    static final int IMAGE_REQUEST_CODE = 101;
 
     // vars
     EditText name, address, maxCourts;
@@ -30,9 +33,9 @@ public class AddLocationActivity extends AppCompatActivity {
     ImageView logo;
     Location cLocation;
     Toolbar toolbar;
+    int position;
 
     private boolean isContentChanged = false;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,15 +55,21 @@ public class AddLocationActivity extends AppCompatActivity {
         btnSave = findViewById(R.id.buttonSave);
 
         Intent intent = getIntent();
-        cLocation = (Location) intent.getParcelableExtra("locations");
+        Log.d(TAG, "onCreate: has parcel? " + intent.hasExtra("location"));
+        cLocation = intent.getParcelableExtra("location");
+        position = intent.getIntExtra("position", -1);
 
         if (cLocation != null) {
-            Picasso.with(this).load(cLocation.getLogo()).resize(480, 480).centerCrop().into(logo);
+            Picasso.with(this).load(cLocation.getLogo()).into(logo);
+            Log.d(TAG, "onCreate: path of image: " + cLocation.getLogo());
             name.setText(cLocation.getName());
             address.setText(cLocation.getAddress());
             maxCourts.setText(String.valueOf(cLocation.getMaxCourts()));
-        }
+            Toast.makeText(this,cLocation.getLogo().toString(), Toast.LENGTH_LONG).show();
+        } else cLocation = new Location();
     }
+
+
 
     private TextWatcher textWatcher = new TextWatcher() {
         @Override
@@ -79,11 +88,19 @@ public class AddLocationActivity extends AppCompatActivity {
 
     public void btnSave_Click(View v) {
         Intent returnIntent = new Intent();
-        returnIntent.putExtra("name", name.getText().toString());
-        returnIntent.putExtra("address", address.getText().toString());
-        returnIntent.putExtra("maxCourts", maxCourts.getText().toString());
-        returnIntent.putExtra("logo", logo.getTag().toString());
-        setResult((isContentChanged ? RESULT_OK : RESULT_CANCELED), returnIntent);
+        if (isContentChanged) {
+
+            cLocation.setName(String.valueOf(name.getText()));
+            cLocation.setAddress(String.valueOf(address.getText()));
+            cLocation.setMaxCourts(Integer.parseInt(maxCourts.getText().toString()));
+
+            returnIntent.putExtra("location", (Parcelable) cLocation);
+            returnIntent.putExtra("position", position);
+            setResult(RESULT_OK, returnIntent);
+
+        } else setResult(RESULT_CANCELED, returnIntent);
+
+        cLocation = null;
         finish();
     }
 
@@ -104,13 +121,12 @@ public class AddLocationActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if ((requestCode == IMAGE_REQUEST_CODE) && (resultCode == RESULT_OK)) {
-
             Uri selectedImage = data.getData();
-            // logo.setTag(Uri.parse(selectedImage.toString()).getPath());
             logo.setTag(selectedImage);
-            logo.setImageURI(selectedImage); // TODO: check if this is necessary
+            cLocation.setLogo(selectedImage);
+            logo.setImageURI(selectedImage);
             // writeUsingOutputStream(selectedImage.toString());
-            Picasso.with(this).load(selectedImage).resize(480, 480).centerCrop().into(logo);
+            Picasso.with(this).load(cLocation.getLogo()).resize(480, 480).centerInside().into(logo);
             isContentChanged = true;
         }
     }

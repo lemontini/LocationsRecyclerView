@@ -1,12 +1,14 @@
 package com.montini.locationsrecyclerview.model;
 
 import android.net.Uri;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-public class Location {
+public class Location implements Parcelable {
     private String name;
     private String address;
     private int maxCourts;
-    Uri logo;
+    private Uri logo;
 
     public Location() {}
 
@@ -28,5 +30,39 @@ public class Location {
 
     public Uri getLogo() { return logo; }
     public void setLogo(Uri logo) { this.logo = logo; }
+
+    // Implementation of Parcelable interface
+
+    protected Location(Parcel in) {
+        name = in.readString();
+        address = in.readString();
+        maxCourts = in.readInt();
+        logo = in.readParcelable(Uri.class.getClassLoader());
+    }
+
+    public static final Creator<Location> CREATOR = new Creator<Location>() {
+        @Override
+        public Location createFromParcel(Parcel in) {
+            return new Location(in);
+        }
+
+        @Override
+        public Location[] newArray(int size) {
+            return new Location[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(name);
+        parcel.writeString(address);
+        parcel.writeInt(maxCourts);
+        parcel.writeParcelable(logo, i);
+    }
 
 }

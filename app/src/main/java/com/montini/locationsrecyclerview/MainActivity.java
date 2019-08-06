@@ -2,6 +2,7 @@ package com.montini.locationsrecyclerview;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -73,22 +74,22 @@ public class MainActivity extends AppCompatActivity implements LocationAdapter.O
         super.onActivityResult(requestCode, resultCode, data);
 
         if (resultCode == RESULT_OK) {
+            Location location = data.getParcelableExtra("location");
+            int position = data.getIntExtra("position", -1);
+
             switch (requestCode) {
                 case LOCATION_EDIT:
-
+                    locations.set(position, location);
+                    break;
                 case LOCATION_ADD: {
-                    locations.add(new Location(
-                            data.getStringExtra("name"),
-                            data.getStringExtra("address"),
-                            Integer.valueOf(data.getStringExtra("maxCourts")),
-                            Uri.parse(data.getStringExtra("logo"))));
+                    locations.add(location);
+                    break;
                 }
             }
+            Log.d(TAG, "onActivityResult: path of the image is: " + location.getLogo());
             locationAdapter.notifyDataSetChanged();
         }
-        Log.d(TAG, "onActivityResult: locations.logo: [" + locations.get(locations.size() - 1).getLogo() + "]");
     }
-
 
     private void initLocationsView() {
         Log.d(TAG, "initLocationsView: init LocationsView.");
@@ -100,10 +101,12 @@ public class MainActivity extends AppCompatActivity implements LocationAdapter.O
 
     @Override
     public void onLocationClick(int position) {
-        Log.d(TAG, "onLocationClick: clicked.");
-        locations.get(position);
+        Log.d(TAG, "onLocationClick: clicked: " + position);
+        // locations.get(position);
         Intent intent = new Intent(this, AddLocationActivity.class);
-        // intent.putExtra("",);
+        intent.putExtra("location", (Parcelable) locations.get(position));
+        intent.putExtra("position", position);
+        Log.d(TAG, "onLocationClick: before parcelable: " + locations.get(position).getLogo());
         startActivityForResult(intent, LOCATION_EDIT);
     }
 
