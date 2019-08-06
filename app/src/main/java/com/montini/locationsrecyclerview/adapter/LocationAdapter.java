@@ -23,24 +23,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.ViewHolder> {
-    // public class LocationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
+    // constants
     private static final String TAG = "LocationAdapter";
 
+    // vars
     private Context context;
-    private List<Location> locations = new ArrayList<>();
+    private List<Location> locations;
+    private OnLocationListener onLocationListener;
 
-    public LocationAdapter(Context context, List<Location> locations) {
+    // constructor
+    public LocationAdapter(Context context, List<Location> locations, OnLocationListener onLocationListener) {
         this.context = context;
         // if (this.locations == null) this.locations = new ArrayList<>();
         this.locations = locations;
+        this.onLocationListener = onLocationListener;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.inner_layout, viewGroup, false);
-        ViewHolder holder = new ViewHolder(view);
+        ViewHolder holder = new ViewHolder(view, onLocationListener);
         return holder;
     }
 
@@ -52,13 +56,13 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.ViewHo
         viewHolder.aName.setText(locations.get(i).getName());
         viewHolder.aAddress.setText(locations.get(i).getAddress());
 
-        viewHolder.aItem.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(TAG, "onClick: clicked on: " + locations.get(i));
-                Toast.makeText(context, locations.get(i).getName(), Toast.LENGTH_SHORT).show();
-            }
-        });
+        // viewHolder.aItem.setOnClickListener(new View.OnClickListener() {
+        //     @Override
+        //     public void onClick(View v) {
+        //         Log.d(TAG, "onClick: clicked on: " + locations.get(i));
+        //         Toast.makeText(context, locations.get(i).getName(), Toast.LENGTH_SHORT).show();
+        //     }
+        // });
     }
 
     @Override
@@ -66,20 +70,32 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.ViewHo
         return locations.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         ImageView aLogo;
         TextView aName, aAddress;
         LinearLayout aItem;
+        OnLocationListener onLocationListener;
 
-        public ViewHolder(@NonNull View itemView) {
+        public ViewHolder(@NonNull View itemView, OnLocationListener onLocationListener) {
             super(itemView);
             this.aLogo = itemView.findViewById(R.id.vLogo);
             this.aName = itemView.findViewById(R.id.vName);
             this.aAddress = itemView.findViewById(R.id.vAddress);
             this.aItem = itemView.findViewById(R.id.list_line);
+            this.onLocationListener = onLocationListener;
+
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+            onLocationListener.onLocationClick(getAdapterPosition());
         }
     }
 
+    public interface OnLocationListener {
+        void onLocationClick(int position);
+    }
     // public LocationAdapter(Context context, List<Location> locations) {
     //     this.context = context;
     //     this.locations = locations;

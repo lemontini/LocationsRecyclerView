@@ -1,10 +1,7 @@
 package com.montini.locationsrecyclerview;
 
-import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.net.Uri;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -16,15 +13,19 @@ import android.widget.Button;
 
 import com.montini.locationsrecyclerview.adapter.LocationAdapter;
 import com.montini.locationsrecyclerview.model.Location;
-import com.montini.locationsrecyclerview.viewmodel.LocationViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements LocationAdapter.OnLocationListener {
 
+    // constants
     private static final String TAG = "MainActivity";
+    public final int LOCATION_ADD = 01;
+    public final int LOCATION_EDIT = 02;
+    public final int RESULT_UNCHANGED = 03;
 
+    // vars
     // private LocationViewModel locationViewModel;
     // private RecyclerView recyclerView;
     private LocationAdapter locationAdapter;
@@ -32,8 +33,6 @@ public class MainActivity extends AppCompatActivity {
 
     Toolbar toolbar;
     Button btnAdd;
-
-    public final int ADD_LOCATION = 01;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(v.getContext(), AddLocationActivity.class);
-                startActivityForResult(intent, ADD_LOCATION);
+                startActivityForResult(intent, LOCATION_ADD);
             }
         });
 
@@ -73,25 +72,39 @@ public class MainActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == ADD_LOCATION && resultCode == RESULT_OK) {
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case LOCATION_EDIT:
 
-            locations.add(new Location(
-                    data.getStringExtra("name"),
-                    data.getStringExtra("address"),
-                    Integer.valueOf(data.getStringExtra("maxCourts")),
-                    Uri.parse(data.getStringExtra("logo"))));
-            Log.d(TAG, "onActivityResult: locations.logo: [" + locations.get(locations.size() - 1).getLogo() + "]");
+                case LOCATION_ADD: {
+                    locations.add(new Location(
+                            data.getStringExtra("name"),
+                            data.getStringExtra("address"),
+                            Integer.valueOf(data.getStringExtra("maxCourts")),
+                            Uri.parse(data.getStringExtra("logo"))));
+                }
+            }
+            locationAdapter.notifyDataSetChanged();
         }
-        locationAdapter.notifyDataSetChanged();
+        Log.d(TAG, "onActivityResult: locations.logo: [" + locations.get(locations.size() - 1).getLogo() + "]");
     }
 
 
     private void initLocationsView() {
         Log.d(TAG, "initLocationsView: init LocationsView.");
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
-        locationAdapter = new LocationAdapter(this, locations);
+        locationAdapter = new LocationAdapter(this, locations, this);
         recyclerView.setAdapter(locationAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+    }
+
+    @Override
+    public void onLocationClick(int position) {
+        Log.d(TAG, "onLocationClick: clicked.");
+        locations.get(position);
+        Intent intent = new Intent(this, AddLocationActivity.class);
+        // intent.putExtra("",);
+        startActivityForResult(intent, LOCATION_EDIT);
     }
 
     // @Override
@@ -123,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
     //         @Override
     //         public void onClick(View v) {
     //             Intent intent = new Intent(v.getContext(), AddLocationActivity.class);
-    //             startActivityForResult(intent, ADD_LOCATION);
+    //             startActivityForResult(intent, LOCATION_ADD);
     //         }
     //     });
     // }
@@ -131,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
     // @Override
     // public void onActivityResult(int requestCode, int resultCode, Intent data) {
     //     super.onActivityResult(requestCode, resultCode, data);
-    //     if (requestCode == ADD_LOCATION && resultCode == RESULT_OK) {
+    //     if (requestCode == LOCATION_ADD && resultCode == RESULT_OK) {
     //         // locationViewModel.addNewEntry(new Location(
     //         //         data.getStringExtra("name"),
     //         //         data.getStringExtra("address"),
@@ -164,5 +177,4 @@ public class MainActivity extends AppCompatActivity {
     public static Uri getUriForResource(int resourceId) {
         return Uri.parse("android.resource://" + R.class.getPackage().getName() + "/" + resourceId);
     }
-
 }

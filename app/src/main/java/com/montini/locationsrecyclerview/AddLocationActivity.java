@@ -8,7 +8,8 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -19,15 +20,19 @@ import com.squareup.picasso.Picasso;
 
 public class AddLocationActivity extends AppCompatActivity {
 
+    // constants
     private static final String TAG = "AddLocationActivity";
+    static final int IMAGE_REQUEST_CODE = 02;
 
+    // vars
     EditText name, address, maxCourts;
     Button btnSave;
     ImageView logo;
     Location cLocation;
     Toolbar toolbar;
 
-    static final int IMAGE_REQUEST_CODE = 02;
+    private boolean isContentChanged = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,8 +44,11 @@ public class AddLocationActivity extends AppCompatActivity {
 
         logo = findViewById(R.id.choose_logo_Image);
         name = findViewById(R.id.editText1);
+        name.addTextChangedListener(textWatcher);
         address = findViewById(R.id.editText2);
+        address.addTextChangedListener(textWatcher);
         maxCourts = findViewById(R.id.editText3);
+        maxCourts.addTextChangedListener(textWatcher);
         btnSave = findViewById(R.id.buttonSave);
 
         Intent intent = getIntent();
@@ -54,13 +62,28 @@ public class AddLocationActivity extends AppCompatActivity {
         }
     }
 
+    private TextWatcher textWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            isContentChanged = true;
+        }
+    };
+
     public void btnSave_Click(View v) {
         Intent returnIntent = new Intent();
         returnIntent.putExtra("name", name.getText().toString());
         returnIntent.putExtra("address", address.getText().toString());
         returnIntent.putExtra("maxCourts", maxCourts.getText().toString());
         returnIntent.putExtra("logo", logo.getTag().toString());
-        setResult(RESULT_OK, returnIntent);
+        setResult((isContentChanged ? RESULT_OK : RESULT_CANCELED), returnIntent);
         finish();
     }
 
@@ -79,15 +102,16 @@ public class AddLocationActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode) {
-            case IMAGE_REQUEST_CODE:
-                Uri selectedImage = data.getData();
-                // logo.setTag(Uri.parse(selectedImage.toString()).getPath());
-                logo.setTag(selectedImage);
-                logo.setImageURI(selectedImage);
-                // writeUsingOutputStream(selectedImage.toString());
-                Picasso.with(this).load(selectedImage).resize(480, 480).centerCrop().into(logo);
-                break;
+
+        if ((requestCode == IMAGE_REQUEST_CODE) && (resultCode == RESULT_OK)) {
+
+            Uri selectedImage = data.getData();
+            // logo.setTag(Uri.parse(selectedImage.toString()).getPath());
+            logo.setTag(selectedImage);
+            logo.setImageURI(selectedImage); // TODO: check if this is necessary
+            // writeUsingOutputStream(selectedImage.toString());
+            Picasso.with(this).load(selectedImage).resize(480, 480).centerCrop().into(logo);
+            isContentChanged = true;
         }
     }
 
