@@ -28,12 +28,12 @@ public class AddLocationActivity extends AppCompatActivity {
     static final int IMAGE_REQUEST_CODE = 101;
 
     // vars
-    EditText name, address, maxCourts;
-    Button btnSave;
-    ImageView logo;
-    Location cLocation;
-    Toolbar toolbar;
-    int position;
+    private EditText name, address, maxCourts;
+    private Button btnSave;
+    private ImageView logo;
+    private Location cLocation;
+    private Toolbar toolbar;
+    private int position;
 
     private boolean isContentChanged = false;
 
@@ -60,7 +60,8 @@ public class AddLocationActivity extends AppCompatActivity {
         position = intent.getIntExtra("position", -1);
 
         if (cLocation != null) {
-            Picasso.with(this).load(cLocation.getLogo()).into(logo);
+            Picasso.with(this).setLoggingEnabled(true);
+            Picasso.with(this).load(cLocation.getLogo()).error(R.drawable.placeholder_camera).resize(480, 480).centerCrop().into(logo);
             Log.d(TAG, "onCreate: path of image: " + cLocation.getLogo());
             name.setText(cLocation.getName());
             address.setText(cLocation.getAddress());
@@ -68,8 +69,6 @@ public class AddLocationActivity extends AppCompatActivity {
             Toast.makeText(this,cLocation.getLogo().toString(), Toast.LENGTH_LONG).show();
         } else cLocation = new Location();
     }
-
-
 
     private TextWatcher textWatcher = new TextWatcher() {
         @Override
@@ -100,7 +99,6 @@ public class AddLocationActivity extends AppCompatActivity {
 
         } else setResult(RESULT_CANCELED, returnIntent);
 
-        cLocation = null;
         finish();
     }
 
