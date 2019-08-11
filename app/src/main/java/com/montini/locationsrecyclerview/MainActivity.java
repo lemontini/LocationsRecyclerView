@@ -1,8 +1,11 @@
 package com.montini.locationsrecyclerview;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Parcelable;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,6 +17,7 @@ import android.widget.Button;
 
 import com.montini.locationsrecyclerview.adapter.LocationAdapter;
 import com.montini.locationsrecyclerview.model.Location;
+import com.montini.locationsrecyclerview.viewmodel.LocationViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements LocationAdapter.O
     // private RecyclerView recyclerView;
     private LocationAdapter locationAdapter;
     private List<Location> locations; // = new ArrayList<>()
+    private LocationViewModel locationViewModel;
 
     Toolbar toolbar;
     Button btnAdd;
@@ -45,6 +50,17 @@ public class MainActivity extends AppCompatActivity implements LocationAdapter.O
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        locationViewModel = ViewModelProviders.of(this).get(LocationViewModel.class);
+
+        locationViewModel.init();
+
+        locationViewModel.getLocations().observe(this, new Observer<List<Location>>() {
+            @Override
+            public void onChanged(@Nullable List<Location> locations) {
+                locationAdapter.notifyDataSetChanged();
+            }
+        });
 
         initData();
     }

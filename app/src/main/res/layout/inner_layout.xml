@@ -33,8 +33,9 @@
                 android:id="@+id/vLogo"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
-                android:layout_gravity="center"
-                app:imgUrl="@{locationModel.logoUrl}" />
+                android:layout_gravity="center" />
+                <!--app:imgUrl="@{locationModel.logo}"-->
+
 
             <LinearLayout
                 android:layout_width="match_parent"
