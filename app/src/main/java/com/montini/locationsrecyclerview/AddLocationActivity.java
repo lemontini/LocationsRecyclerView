@@ -1,11 +1,16 @@
 package com.montini.locationsrecyclerview;
 
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Parcelable;
+import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -20,6 +25,9 @@ import android.widget.Toast;
 
 import com.montini.locationsrecyclerview.model.Location;
 import com.squareup.picasso.Picasso;
+
+import java.io.File;
+import java.io.IOException;
 
 public class AddLocationActivity extends AppCompatActivity {
 
@@ -55,18 +63,18 @@ public class AddLocationActivity extends AppCompatActivity {
         btnSave = findViewById(R.id.buttonSave);
 
         Intent intent = getIntent();
-        Log.d(TAG, "onCreate: has parcel? " + intent.hasExtra("location"));
+        // Log.d(TAG, "onCreate: has parcel? " + intent.hasExtra("location"));
         cLocation = intent.getParcelableExtra("location");
         position = intent.getIntExtra("position", -1);
 
         if (cLocation != null) {
-            Picasso.with(this).setLoggingEnabled(true);
-            Picasso.with(this).load(cLocation.getLogo()).error(R.drawable.placeholder_camera).resize(480, 480).centerCrop().into(logo);
-            Log.d(TAG, "onCreate: path of image: " + cLocation.getLogo());
+            // Picasso.with(this).setLoggingEnabled(true);
+            Picasso.with(this).load(cLocation.getLogo()).error(R.drawable.placeholder_camera).resize(480, 480).centerInside().into(logo);
+            // Log.d(TAG, "onCreate: path of image: " + cLocation.getLogo());
             name.setText(cLocation.getName());
             address.setText(cLocation.getAddress());
             maxCourts.setText(String.valueOf(cLocation.getMaxCourts()));
-            Toast.makeText(this,cLocation.getLogo().toString(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, cLocation.getLogo().toString(), Toast.LENGTH_LONG).show();
         } else cLocation = new Location();
     }
 
@@ -104,10 +112,11 @@ public class AddLocationActivity extends AppCompatActivity {
 
     public void logo_Click(View v) {
         //Create an Intent with action as ACTION_PICK
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        requestPermission();
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         // Sets the type as image/*. This ensures only components of type image are selected
         intent.setType("image/*");
-        //We pass an extra array with the accepted mime types. This will ensure only components with these MIME types as targeted.
+        // We pass an extra array with the accepted mime types. This will ensure only components with these MIME types as targeted.
         String[] mimeTypes = {"image/jpeg", "image/png"};
         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
         // Launching the Intent
@@ -120,11 +129,13 @@ public class AddLocationActivity extends AppCompatActivity {
 
         if ((requestCode == IMAGE_REQUEST_CODE) && (resultCode == RESULT_OK)) {
             Uri selectedImage = data.getData();
-            logo.setTag(selectedImage);
-            cLocation.setLogo(selectedImage);
-            logo.setImageURI(selectedImage);
-            // writeUsingOutputStream(selectedImage.toString());
-            Picasso.with(this).load(cLocation.getLogo()).resize(480, 480).centerInside().into(logo);
+            String picturePath = "file://" + getPathFromContentURI(selectedImage);
+            // Log.d(TAG, "onActivityResult: THE IMAGE content: " + selectedImage.toString() + "\n PATH: " + getPathFromContentURI(selectedImage) + "\nNEW: " + picturePath);
+            // logo.setTag(picturePath);
+            cLocation.setLogo(Uri.parse(picturePath));
+            // logo.setImageURI(selectedImage);
+            // // writeUsingOutputStream(selectedImage.toString());
+            Picasso.with(this).load(picturePath).resize(480, 480).centerInside().into(logo);
             isContentChanged = true;
         }
     }
@@ -133,26 +144,24 @@ public class AddLocationActivity extends AppCompatActivity {
     //         FileWriter cache = new FileWriter("cache/" + logoFileName);
     // }
 
-    public String getFileName(Uri uri) {
-        String result = null;
-        if (uri.getScheme().equals("content")) {
-            Cursor cursor = getContentResolver().query(uri, null, null, null, null);
-            try {
-                if (cursor != null && cursor.moveToFirst()) {
-                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
-                }
-            } finally {
-                cursor.close();
-            }
+    private void requestPermission() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            Toast.makeText(this, "Write External Storage permission allows us to save files. Please allow this permission in App Settings.", Toast.LENGTH_LONG).show();
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 100);
         }
-        if (result == null) {
-            result = uri.getPath();
-            int cut = result.lastIndexOf('/');
-            if (cut != -1) {
-                result = result.substring(cut + 1);
-            }
+    }
+
+    public String getPathFromContentURI(Uri contentUri) {
+        String res = null;
+        String[] proj = {MediaStore.Images.Media.DATA};
+        Cursor cursor = getContentResolver().query(contentUri, proj, null, null, null);
+        if (cursor.moveToFirst()) {
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            res = cursor.getString(column_index);
         }
-        return result;
+        cursor.close();
+        return res;
     }
 
     // public void writeUsingOutputStream(String data) {

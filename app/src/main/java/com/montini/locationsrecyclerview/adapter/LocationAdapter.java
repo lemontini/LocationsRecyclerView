@@ -49,10 +49,10 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.ViewHo
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder viewHolder, final int i) {
-        Log.d(TAG, "onBindViewHolder: called. Picture: "+locations.get(i).getLogo());
+    public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
+        Log.d(TAG, "onBindViewHolder: called. Picture: " + locations.get(i).getLogo());
 
-        Picasso.with(context).load(locations.get(i).getLogo()).into(viewHolder.aLogo);
+        Picasso.with(context).load(locations.get(i).getLogo()).resize(480, 480).centerInside().into(viewHolder.aLogo);
         viewHolder.aName.setText(locations.get(i).getName());
         viewHolder.aAddress.setText(locations.get(i).getAddress());
 
