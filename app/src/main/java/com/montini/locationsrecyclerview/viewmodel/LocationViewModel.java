@@ -24,6 +24,8 @@ public class LocationViewModel extends ViewModel {
     // private ArrayList<LocationViewModel> locationViewModels = new ArrayList<>();
     private LocationsRepo repo;
 
+
+
     public String getLogoUrl() {
         return logoUrl;
     }
