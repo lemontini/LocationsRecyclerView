@@ -3,6 +3,7 @@ package com.montini.locationsrecyclerview;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
@@ -16,6 +17,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.montini.locationsrecyclerview.adapter.LocationAdapter;
+import com.montini.locationsrecyclerview.databinding.ActivityMainBinding;
 import com.montini.locationsrecyclerview.model.Location;
 import com.montini.locationsrecyclerview.viewmodel.LocationViewModel;
 
@@ -33,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements LocationAdapter.O
     // vars
     // private LocationViewModel locationViewModel;
     // private RecyclerView recyclerView;
+    ActivityMainBinding mainBinding;
     private LocationAdapter locationAdapter;
     private List<Location> locations; // = new ArrayList<>()
     private LocationViewModel locationViewModel;
@@ -44,7 +47,8 @@ public class MainActivity extends AppCompatActivity implements LocationAdapter.O
     protected void onCreate(Bundle savedInstanceState) {
         if (locations == null) locations = new ArrayList<>();
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        // setContentView(R.layout.activity_main);
+        mainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         // overridePendingTransition(0, 0);
         Log.d(TAG, "onCreate: started.");
 

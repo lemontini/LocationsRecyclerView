@@ -36,14 +36,14 @@ public class LocationViewModel extends ViewModel {
         return mLocations;
     }
 
-    // public String getLogo() {
-    //     return logo;
-    // }
-    //
-    // @BindingAdapter({"imgUrl"})
-    // public static void loadImage(ImageView imageView, String logo) {
-    //     Picasso.with(imageView.getContext()).load(logo).into(imageView);
-    // }
+    public String getLogo() {
+        return logo;
+    }
+
+    @BindingAdapter({"imgUrl"})
+    public static void loadImage(ImageView imageView, String logo) {
+        Picasso.with(imageView.getContext()).load(logo).into(imageView);
+    }
 
     // public LocationViewModel() {
     // }
